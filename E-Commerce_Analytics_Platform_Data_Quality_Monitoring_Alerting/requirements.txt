@@ -1,0 +1,12 @@
+apache-airflow[celery,postgres]==2.7.3
+dbt-core==1.5.9
+dbt-postgres==1.5.9
+dbt-expectations==0.3.0
+great-expectations==0.17.11
+ydata-profiling==4.6.0
+pandas==2.1.0
+sqlalchemy==2.0.21
+psycopg2-binary==2.9.9
+faker==19.13.0
+pytest==7.4.2
+requests==2.31.0
