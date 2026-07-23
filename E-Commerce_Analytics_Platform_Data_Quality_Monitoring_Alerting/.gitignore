@@ -1,0 +1,12 @@
+.env
+*.pyc
+__pycache__/
+dbt/profiles.yml
+airflow/logs/
+great_expectations/uncommitted/
+profiling/reports/
+*.log
+*.sqlite
+.idea/
+.vscode/
+*.db
