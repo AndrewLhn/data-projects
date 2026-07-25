@@ -1,0 +1,19 @@
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'telegram'
+
+receivers:
+- name: 'telegram'
+  telegram_configs:
+  - bot_token: '{{ env "TELEGRAM_BOT_TOKEN" }}'
+    chat_id: {{ env "TELEGRAM_CHAT_ID" }}
+    message: |
+      {{ range .Alerts }}
+      **Alert:** {{ .Annotations.summary }}
+      **Severity:** {{ .Labels.severity }}
+      **Description:** {{ .Annotations.description }}
+      **Graph:** {{ .GeneratorURL }}
+      {{ end }}
