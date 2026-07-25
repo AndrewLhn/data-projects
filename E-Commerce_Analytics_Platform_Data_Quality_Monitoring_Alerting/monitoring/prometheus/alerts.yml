@@ -1,0 +1,18 @@
+groups:
+- name: airflow_alerts
+  rules:
+  - alert: DAGNotRunning
+    expr: (time() - airflow_dag_latest_run_duration) > 86400
+    for: 1h
+    labels:
+      severity: warning
+    annotations:
+      summary: "DAG не запускался более суток"
+      description: "Последний запуск DAG sales_pipeline был более 24 часов назад."
+  - alert: TaskFailed
+    expr: airflow_task_failed == 1
+    labels:
+      severity: critical
+    annotations:
+      summary: "Задача Airflow завершилась ошибкой"
+      description: "Задача {{ $labels.task }} в DAG {{ $labels.dag }} упала."
