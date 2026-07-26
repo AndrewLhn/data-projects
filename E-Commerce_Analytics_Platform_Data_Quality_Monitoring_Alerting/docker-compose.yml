@@ -30,7 +30,7 @@ services:
     build: .
     environment:
       - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
       - AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
       - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
       - AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW_WEBSERVER_SECRET_KEY}
@@ -66,9 +66,8 @@ services:
       statsd-exporter:
         condition: service_started
     command: >
-      sh -c "pip install --no-cache-dir -r /opt/airflow/requirements.txt &&
-             airflow db init &&
-             airflow webserver & airflow scheduler & airflow celery worker"
+      bash -c "airflow db init &&
+               airflow webserver & airflow scheduler & airflow celery worker"
     restart: unless-stopped
 
   statsd-exporter:

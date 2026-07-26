@@ -1,12 +1,20 @@
 from airflow import DAG
 from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator, BranchPythonOperator
+from airflow.operators.python import PythonOperator
 from airflow.operators.dummy import DummyOperator
 from airflow.models import Variable
 from airflow.exceptions import AirflowFailException
 from datetime import datetime, timedelta
 import requests
 import logging
+
+def send_telegram_alert(context):
+    bot_token = Variable.get("TELEGRAM_BOT_TOKEN", default_var=None)
+    chat_id = Variable.get("TELEGRAM_CHAT_ID", default_var=None)
+    if bot_token and chat_id:
+        msg = f"🚨 DAG {context['dag'].dag_id} failed: {context['exception']}"
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        requests.post(url, json={"chat_id": chat_id, "text": msg})
 
 default_args = {
     'owner': 'data_team',
@@ -16,14 +24,6 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
     'on_failure_callback': send_telegram_alert
 }
-
-def send_telegram_alert(context):
-    bot_token = Variable.get("TELEGRAM_BOT_TOKEN", default_var=None)
-    chat_id = Variable.get("TELEGRAM_CHAT_ID", default_var=None)
-    if bot_token and chat_id:
-        msg = f"🚨 DAG {context['dag'].dag_id} failed: {context['exception']}"
-        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-        requests.post(url, json={"chat_id": chat_id, "text": msg})
 
 def run_ge_validation(**kwargs):
     import sys
@@ -38,6 +38,7 @@ def generate_profile():
     import sys
     sys.path.append('/opt/airflow/scripts')
     from profile_data import profile_data
+    profile_data()
 
 with DAG(
     'sales_pipeline',
@@ -96,3 +97,5 @@ with DAG(
         bash_command='echo "airflow.task.duration $(( $(date +%s) - {{ ts_nodash }} ))" | nc -u statsd-exporter 9125',
         trigger_rule='all_done'
     )
+
+    start >> generate_data >> ge_validation >> dbt_run >> dbt_test >> [dbt_docs, profile_task, send_metrics]
