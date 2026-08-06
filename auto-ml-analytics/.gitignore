@@ -1,0 +1,12 @@
+.env
+*.pyc
+__pycache__/
+dbt/profiles.yml
+airflow/logs/
+ml/artifacts/
+reports/
+*.log
+*.sqlite
+.idea/
+.vscode/
+*.db
